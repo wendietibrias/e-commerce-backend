@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+model Admin {
+  id         Int           @id @unique @default(autoincrement())
+  name       String        @unique
+  email      String        @unique
+  password   String
+  role       Role          @default(ADMIN)
+  products   Product[]
+  categories Category[]
+  profile    ProfileAdmin?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime?     @updatedAt
+}
+
+model Banner {
+  id          Int       @id @unique @default(autoincrement())
+  title       String
+  bannerImage String
+  subtitle    String    @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+}
+
+model ProfileAdmin {
+  id        Int       @id @unique @default(autoincrement())
+  bio       String?
+  phone     String?
+  address   String?
+  country   String?
+  city      String?
+  birthday  String?
+  adminId   Int       @unique
+  admin     Admin?    @relation(fields: [adminId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Category {
+  id        Int       @id @unique @default(autoincrement())
+  title     String    @unique
+  slug      String    @unique
+  products  Product[]
+  adminId   Int
+  admin     Admin?    @relation(fields: [adminId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id           Int           @id @unique @default(autoincrement())
+  title        String
+  price        Int
+  stock        Int
+  description  String        @db.LongText
+  excerpt      String
+  rating       Int           @default(0)
+  productImage ProductImage?
+  adminId      Int
+  admin        Admin?        @relation(fields: [adminId], references: [id])
+  categoryId   Int
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  recommended  Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ProductImage {
+  id        Int      @id @unique @default(autoincrement())
+  publicId  String
+  url       String
+  productId Int      @unique
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id             Int       @id @unique @default(autoincrement())
+  name           String    @unique
+  email          String    @unique
+  password       String
+  role           Role      @default(USER)
+  orders         Order[]
+  email_verified Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+  Profile        Profile?
+}
+
+model Profile {
+  id        Int      @id @unique @default(autoincrement())
+  bio       String?
+  address   String?
+  country   String?
+  city      String?
+  birthday  String?
+  phone     String?
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id            Int           @id @unique @default(autoincrement())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        Int           @unique
+  country       String
+  city          String
+  address       String
+  payment       String
+  phone         String
+  postalCode    String
+  delivery      String
+  paymentMethod String
+  detail        String
+  ordersDetail  OrderDetail[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderDetail {
+  id           Int      @id @unique @default(autoincrement())
+  productTitle String
+  productPrice Int
+  productImage String
+  qty          Int
+  total        Int
+  orderId      Int
+  order        Order    @relation(fields: [orderId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
