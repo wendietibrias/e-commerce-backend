@@ -4,14 +4,21 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cloudinary from "cloudinary";
 import { fileURLToPath } from 'url';
-import { AuthRoutes,BannerUserRoutes, ProductUserRoutes,CartRoutes } from "./routes/user/index.js";
+import {
+     AuthRoutes,
+     BannerUserRoutes,
+     ProductUserRoutes,
+     CartRoutes,
+     CheckoutRoutes 
+} from "./routes/user/index.js";
 import { 
     AuthAdminRoutes,
     CategoryRoutes,
     ProductRoutes,
     ProfileRoutes ,
     DashboardRoutes,
-    BannerRoutes
+    BannerRoutes,
+    OrderRoutes
 } from "./routes/admin/index.js";
 
 dotenv.config({ debug:false });
@@ -44,6 +51,7 @@ app.use("/api/user/auth",AuthRoutes);
 app.use("/api/user/banner" , BannerUserRoutes);
 app.use("/api/user/product", ProductUserRoutes);
 app.use("/api/user/cart",CartRoutes);
+app.use("/api/user/checkout",CheckoutRoutes);
 
 //routing for admin
 app.use("/api/admin/dashboard" , DashboardRoutes);
@@ -52,6 +60,7 @@ app.use("/api/admin/category",CategoryRoutes);
 app.use("/api/admin/product",ProductRoutes);
 app.use("/api/admin/profile" , ProfileRoutes);
 app.use("/api/admin/banner",BannerRoutes);
+app.use("/api/admin/order" , OrderRoutes);
 
 //run server
 app.listen(port , () => console.log(`run on port : ${port}`));

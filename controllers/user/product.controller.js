@@ -2,7 +2,7 @@ import prisma from "../../utils/prisma.js";
 import { ResponseError, ResponseSuccess } from "../../helper/Response.js";
 
 export const getAllProductController = async (req,res) => {
-    const { recommended,take,category } = req.query;
+    const { recommended,take,category,page,allPage } = req.query;
 
     try {
       if(category && category !== "null") {

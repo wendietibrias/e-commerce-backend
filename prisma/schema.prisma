@@ -1,150 +1,146 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
-enum Role {
-  USER
-  ADMIN
-  SUPERADMIN
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  relationMode      = "prisma"
 }
 
 model Admin {
-  id         Int           @id @unique @default(autoincrement())
-  name       String        @unique
-  email      String        @unique
-  password   String
-  role       Role          @default(ADMIN)
-  products   Product[]
-  categories Category[]
-  profile    ProfileAdmin?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime?     @updatedAt
-}
-
-model Banner {
-  id          Int       @id @unique @default(autoincrement())
-  title       String
-  bannerImage String
-  subtitle    String    @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-}
-
-model ProfileAdmin {
-  id        Int       @id @unique @default(autoincrement())
-  bio       String?
-  phone     String?
-  address   String?
-  country   String?
-  city      String?
-  birthday  String?
-  adminId   Int       @unique
-  admin     Admin?    @relation(fields: [adminId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-}
-
-model Category {
-  id        Int       @id @unique @default(autoincrement())
-  title     String    @unique
-  slug      String    @unique
-  products  Product[]
-  adminId   Int
-  admin     Admin?    @relation(fields: [adminId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Product {
-  id           Int           @id @unique @default(autoincrement())
-  title        String
-  price        Int
-  stock        Int
-  description  String        @db.LongText
-  excerpt      String
-  rating       Int           @default(0)
-  productImage ProductImage?
-  adminId      Int
-  admin        Admin?        @relation(fields: [adminId], references: [id])
-  categoryId   Int
-  category     Category?     @relation(fields: [categoryId], references: [id])
-  recommended  Boolean       @default(false)
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  email        String        @unique
+  password     String
+  role         Role          @default(ADMIN)
+  products     Product[]
+  categories   Category[]
+  ProfileAdmin ProfileAdmin?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 }
 
-model ProductImage {
-  id        Int      @id @unique @default(autoincrement())
-  publicId  String
-  url       String
-  productId Int      @unique
-  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+model ProfileAdmin {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  birthday  String
+  country   String
+  city      String
+  address   String
+  adminId   Int      @unique
+  admin     Admin?   @relation(fields: [adminId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([adminId])
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  title     String
+  slug      String    @unique
+  products  Product[]
+  admin     Admin     @relation(fields: [adminId], references: [id])
+  adminId   Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([adminId])
+}
+
+model Product {
+  id           Int           @id @default(autoincrement())
+  title        String
+  excerpt      String        @db.Text
+  price        Int
+  stock        Int
+  description  String        @db.LongText
+  recommended  Boolean       @default(false)
+  archived     Boolean       @default(false)
+  rating       Int           @default(0)
+  categoryId   Int
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  productImage ProductImage?
+  admin        Admin?        @relation(fields: [adminId], references: [id])
+  adminId      Int
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([categoryId, adminId])
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  publicId  String
+  url       String
+  type      String
+  productId Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Banner {
+  id          Int      @id @default(autoincrement())
+  title       String
+  subtitle    String   @db.LongText
+  bannerImage String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model User {
-  id             Int       @id @unique @default(autoincrement())
-  name           String    @unique
-  email          String    @unique
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  email          String   @unique
   password       String
-  role           Role      @default(USER)
+  role           Role     @default(USER)
   orders         Order[]
-  email_verified Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime? @updatedAt
-  Profile        Profile?
-}
-
-model Profile {
-  id        Int      @id @unique @default(autoincrement())
-  bio       String?
-  address   String?
-  country   String?
-  city      String?
-  birthday  String?
-  phone     String?
-  userId    Int      @unique
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isAdmin        Boolean  @default(false)
+  email_verified Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Order {
-  id            Int           @id @unique @default(autoincrement())
-  user          User          @relation(fields: [userId], references: [id])
-  userId        Int           @unique
+  id            Int           @id @default(autoincrement())
   country       String
   city          String
   address       String
-  payment       String
   phone         String
-  postalCode    String
-  delivery      String
   paymentMethod String
-  detail        String
-  ordersDetail  OrderDetail[]
+  delivery      String
+  detail        String        @db.LongText
+  userId        Int
+  user          User?         @relation(fields: [userId], references: [id])
+  orderDetail   OrderDetail[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
 }
 
 model OrderDetail {
-  id           Int      @id @unique @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   productTitle String
   productPrice Int
   productImage String
   qty          Int
   total        Int
   orderId      Int
-  order        Order    @relation(fields: [orderId], references: [id])
+  order        Order?   @relation(fields: [orderId], references: [id])
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([orderId])
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
 }

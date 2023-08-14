@@ -135,7 +135,7 @@ export const emailVerificationController = async (req,res) => {
       });
 
       if(updateUserVerified) {
-          return res.redirect(`http://localhost:3006/auth/login`);
+          return res.redirect(`http://localhost:3006/auth`);
       }
 
    } catch(err) {

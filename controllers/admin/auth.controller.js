@@ -9,7 +9,7 @@ const salt = Number(process.env.BCRYPT_SALT);
 export const loginController = async (req,res) => {
     const { email,name,password } = req.body;
     const result = validationResult(req);
-
+ 
     //field validation
     if(!result.isEmpty()) {
         return ResponseError(res,result.errors,400);
@@ -28,7 +28,7 @@ export const loginController = async (req,res) => {
       }
 
       //check password matching
-      const comparePassword = bcrypt.compare(password,findAdminAccount.password);
+      const comparePassword = await bcrypt.compare(password,findAdminAccount.password);
       if(!comparePassword) {
          return ResponseError(res,"invalid password or username" , 401);
       }

@@ -94,9 +94,9 @@ export const createProductController = async (req,res) => {
                  data: {
                     title,
                     description,
-                    excerpt,
                     price:Number(price),
                     stock:Number(stock),
+                    excerpt,
                     admin:{
                         connect: {
                             id:findAdminAccount.id
@@ -110,7 +110,8 @@ export const createProductController = async (req,res) => {
                     productImage: {
                         create: {
                             publicId:uploadProductImage.public_id,
-                            url:uploadProductImage.url
+                            url:uploadProductImage.url,
+                            type:uploadProductImage.type
                         }
                     }
                  }
@@ -192,10 +193,10 @@ export const updateProductController = async (req,res) => {
               data: {
                  title,
                  description,
-                 excerpt,
                  stock:Number(stock),
                  price:Number(price),
                  recommended: recommended === 'false' ? false : true,
+                 excerpt,
                  category: {
                     connect:{
                         id:Number(category)
@@ -204,7 +205,8 @@ export const updateProductController = async (req,res) => {
                  productImage: {
                    update: {
                      publicId:uploadProductImage ? uploadProductImage.public_id : findProduct.productImage.publicId,
-                     url:uploadProductImage ? uploadProductImage.url : findProduct.productImage.url
+                     url:uploadProductImage ? uploadProductImage.url : findProduct.productImage.url,
+                     type:uploadProductImage.type
                    }
                  }
               }
